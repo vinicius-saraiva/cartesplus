@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartes+</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --text-color: #202124;
+            --background-color: #f0f4f8;
+            --surface-color: #ffffff;
+            --border-color: #dadce0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 100%;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px;
+            box-sizing: border-box;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 60px);
+        }
+
+        .step {
+            background: var(--surface-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: none;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .step.hidden {
+            display: none;
+            opacity: 0;
+        }
+
+        .logo {
+            width: 180px;
+            height: auto;
+            margin: 0 0 32px 0;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .step-number {
+            font-size: 14px;
+            color: var(--primary-color);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .step-header .step-number {
+            margin-bottom: 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: var(--text-color);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+        }
+
+        input::placeholder {
+            color: #5f6368;
+        }
+
+        .wallet-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .wallet-button {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            max-width: 240px;
+            width: 100%;
+        }
+
+        .wallet-button:hover {
+            transform: scale(1.02);
+        }
+
+        .wallet-button img {
+            width: 100%;
+            height: auto;
+        }
+
+        .continue-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            max-width: 200px;
+            margin: 16px auto 0;
+            display: block;
+        }
+
+        .continue-button:hover {
+            background-color: #1557b0;
+        }
+
+        @media (min-width: 480px) {
+            .container {
+                max-width: 440px;
+                padding: 40px 24px;
+            }
+        }
+
+        .back-button {
+            color: var(--primary-color);
+            background: none;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0;
+            margin: 0;
+        }
+
+        .back-button:hover {
+            color: #1557b0;
+        }
+
+        .back-button svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .step-description {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #5f6368;
+            margin: 0 0 20px 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 24px;
+            color: #5f6368;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .pass-preview {
+            background-color: #1F303D;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            color: white;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .pass-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 0 4px;
+        }
+
+        .pass-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: white;
+            padding: 4px;
+        }
+
+        .pass-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .pass-subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 8px;
+            padding: 0 4px;
+        }
+
+        .pass-number {
+            font-size: 20px;
+            font-weight: 500;
+            padding: 0 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .pass-barcode {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .barcode-container {
+            width: 100%;
+            max-width: 240px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .barcode-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .pass-barcode-number {
+            color: #1F303D;
+            font-size: 14px;
+            margin-top: 12px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .pass-hero {
+            width: 100%;
+            height: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="images/cartes+logo.png" alt="Cartes+" class="logo">
+        
+        <div id="step1" class="step">
+            <div class="step-number">ÉTAPE 1</div>
+            <p class="step-description">
+                Entrez le numéro de code-barres qui se trouve sur votre carte physique.
+            </p>
+            <input type="text" id="barcodeInput" placeholder="Entrez votre numéro de code-barres">
+            <button onclick="goToStep2()" class="continue-button">Continuer</button>
+        </div>
+
+        <div id="step2" class="step hidden">
+            <div class="step-header">
+                <div class="step-number">ÉTAPE 2</div>
+                <button onclick="goToStep1()" class="back-button">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/>
+                    </svg>
+                    Retour
+                </button>
+            </div>
+
+            <div class="pass-preview">
+                <div class="pass-header">
+                    <img src="images/climb-logo.png" alt="Logo" class="pass-logo">
+                    <div class="pass-title">Climbing Card</div>
+                </div>
+                <div class="pass-subtitle">Member Card</div>
+                <div class="pass-number" id="previewPassNumber">0321831</div>
+                <div class="pass-barcode">
+                    <div class="barcode-container">
+                        <svg class="barcode-svg" viewBox="0 0 100 40">
+                            <rect x="5" y="5" width="1" height="30" fill="#1F303D"/>
+                            <rect x="8" y="5" width="2" height="30" fill="#1F303D"/>
+                            <rect x="12" y="5" width="3" height="30" fill="#1F303D"/>
+                            <rect x="17" y="5" width="1" height="30" fill="#1F303D"/>
+                            <rect x="20" y="5" width="2" height="30" fill="#1F303D"/>
+                            <rect x="24" y="5" width="4" height="30" fill="#1F303D"/>
+                            <rect x="30" y="5" width="1" height="30" fill="#1F303D"/>
+                            <rect x="34" y="5" width="3" height="30" fill="#1F303D"/>
+                            <rect x="39" y="5" width="2" height="30" fill="#1F303D"/>
+                            <rect x="43" y="5" width="1" height="30" fill="#1F303D"/>
+                            <rect x="47" y="5" width="4" height="30" fill="#1F303D"/>
+                            <rect x="53" y="5" width="2" height="30" fill="#1F303D"/>
+                            <rect x="57" y="5" width="1" height="30" fill="#1F303D"/>
+                            <rect x="60" y="5" width="3" height="30" fill="#1F303D"/>
+                            <rect x="65" y="5" width="2" height="30" fill="#1F303D"/>
+                            <rect x="69" y="5" width="4" height="30" fill="#1F303D"/>
+                            <rect x="75" y="5" width="1" height="30" fill="#1F303D"/>
+                            <rect x="78" y="5" width="2" height="30" fill="#1F303D"/>
+                            <rect x="82" y="5" width="3" height="30" fill="#1F303D"/>
+                            <rect x="87" y="5" width="1" height="30" fill="#1F303D"/>
+                            <rect x="90" y="5" width="2" height="30" fill="#1F303D"/>
+                            <rect x="94" y="5" width="1" height="30" fill="#1F303D"/>
+                        </svg>
+                    </div>
+                    <div class="pass-barcode-number" id="previewBarcodeNumber">0321831</div>
+                </div>
+                <img src="images/climb-hero.png" alt="Hero" class="pass-hero">
+            </div>
+
+            <div class="wallet-buttons">
+                <div class="wallet-button" onclick="generatePass()">
+                    <img src="images/frFR_add_to_google_wallet_add-wallet-badge.png" alt="Ajouter à Google Wallet">
+                </div>
+                <div class="wallet-button">
+                    <img src="images/fr_add_to_apple_wallet_rgb_102921.svg" alt="Ajouter à Apple Wallet">
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        © Cartes.fr 2025
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html> 
