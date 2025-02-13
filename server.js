@@ -13,7 +13,13 @@ app.use(express.static('public'));
 
 // Your Google Cloud project credentials
 const issuerId = process.env.ISSUER_ID;
-const credentials = require('./credentials.json');
+
+// Use environment variable on Vercel, local file otherwise
+const credentials = process.env.VERCEL 
+    ? JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
+    : require('./credentials.json');
+
+console.log('Running on:', process.env.VERCEL ? 'Vercel' : 'Local');
 
 // Add this near your other environment variables
 const PASSSLOT_API_KEY = process.env.PASSSLOT_API_KEY;
@@ -142,21 +148,29 @@ async function generatePass(barcodeNumber) {
 app.post('/generate-pass', async (req, res) => {
     try {
         const { barcodeNumber } = req.body;
+        console.log('Generating Google Wallet pass for:', barcodeNumber);
+        
         const saveUrl = await generatePass(barcodeNumber);
+        console.log('Generated save URL:', saveUrl);
+        
         res.json({ saveUrl });
     } catch (error) {
-        console.error('Full error:', error);
+        console.error('Full error details:', {
+            message: error.message,
+            stack: error.stack,
+            response: error.response?.data
+        });
         
         // If it's a 409 error (pass already exists), we can still proceed
         if (error.code === 409) {
             try {
-                // Clean the barcode number here
                 const cleanBarcodeNumber = barcodeNumber.replace(/[^0-9]/g, '');
+                console.log('Pass exists, generating token for:', cleanBarcodeNumber);
                 
                 const claims = {
                     iss: credentials.client_email,
                     aud: 'google',
-                    origins: ['localhost', 'localhost:3000'],
+                    origins: [process.env.VERCEL_URL || 'localhost:3000'], // Add Vercel URL
                     typ: 'savetowallet',
                     payload: {
                         genericObjects: [{
@@ -167,7 +181,10 @@ app.post('/generate-pass', async (req, res) => {
                 };
 
                 const token = jwt.sign(claims, credentials.private_key, { algorithm: 'RS256' });
-                return res.json({ saveUrl: `https://pay.google.com/gp/v/save/${token}` });
+                const saveUrl = `https://pay.google.com/gp/v/save/${token}`;
+                console.log('Generated fallback URL:', saveUrl);
+                
+                return res.json({ saveUrl });
             } catch (jwtError) {
                 console.error('JWT Error:', jwtError);
                 res.status(500).json({ error: 'Failed to generate pass token' });
