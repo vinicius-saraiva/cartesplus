@@ -11,15 +11,35 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
+// Add this near the top
+process.on('unhandledRejection', (error) => {
+    console.error('Unhandled Rejection:', error);
+});
+
 // Your Google Cloud project credentials
 const issuerId = process.env.ISSUER_ID;
 
-// Use environment variable on Vercel, local file otherwise
-const credentials = process.env.VERCEL 
-    ? JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
-    : require('./credentials.json');
+// Initialize credentials at the top level
+let credentials;
 
-console.log('Running on:', process.env.VERCEL ? 'Vercel' : 'Local');
+// Use environment variable on Vercel, local file otherwise
+try {
+    credentials = process.env.VERCEL 
+        ? JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
+        : require('./credentials.json');
+
+    console.log('Running on:', process.env.VERCEL ? 'Vercel' : 'Local');
+    console.log('Credentials loaded:', {
+        type: credentials.type,
+        project_id: credentials.project_id,
+        client_email: credentials.client_email,
+        // Log partial private key to verify it's there
+        private_key: credentials.private_key ? 'Present (starts with: ' + credentials.private_key.substring(0, 20) + '...)' : 'Missing'
+    });
+} catch (error) {
+    console.error('Error loading credentials:', error);
+    throw new Error('Failed to load credentials: ' + error.message);
+}
 
 // Add this near your other environment variables
 const PASSSLOT_API_KEY = process.env.PASSSLOT_API_KEY;
