@@ -4,6 +4,8 @@ const { JWT } = require('google-auth-library');
 const path = require('path');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const https = require('https'); // Built into Node.js
+const fetch = require('node-fetch');
 
 const app = express();
 app.use(express.json());
@@ -12,6 +14,16 @@ app.use(express.static('public'));
 // Your Google Cloud project credentials
 const issuerId = process.env.ISSUER_ID;
 const credentials = require('./credentials.json');
+
+// Add this near your other environment variables
+const PASSSLOT_API_KEY = process.env.PASSSLOT_API_KEY;
+const PASSSLOT_TEMPLATE_ID = process.env.PASSSLOT_TEMPLATE_ID;
+
+// Add this near the top, after app is defined
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path}`);
+    next();
+});
 
 function calculateEAN13CheckDigit(number12) {
     // Remove any spaces and take first 12 digits
@@ -220,6 +232,46 @@ app.get('/get-pass/:barcode', async (req, res) => {
     } catch (error) {
         console.error('Error getting pass:', error);
         res.status(500).json({ error: 'Failed to get pass link' });
+    }
+});
+
+app.post('/generate-apple-pass', async (req, res) => {
+    try {
+        const { barcodeNumber } = req.body;
+        
+        console.log('Generating pass for barcode:', barcodeNumber); // Debug log
+        
+        const response = await fetch(`https://api.passslot.com/v1/templates/${PASSSLOT_TEMPLATE_ID}/pass`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Basic ${Buffer.from(PASSSLOT_API_KEY + ':').toString('base64')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                memberNumber: barcodeNumber,
+                barcode: formatEAN13(barcodeNumber),
+                memberSince: new Date().toLocaleDateString('fr-FR')
+            })
+        });
+
+        console.log('PassSlot response status:', response.status); // Debug log
+
+        if (!response.ok) {
+            const error = await response.json();
+            console.error('PassSlot error response:', error); // Debug log
+            throw new Error(error.message || 'Failed to generate pass');
+        }
+
+        const data = await response.json();
+        console.log('PassSlot success response:', data); // Debug log
+        res.json({ passUrl: data.url });
+
+    } catch (error) {
+        console.error('PassSlot Error:', error);
+        res.status(500).json({ 
+            error: 'Failed to generate pass',
+            details: error.message
+        });
     }
 });
 
