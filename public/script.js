@@ -166,8 +166,8 @@ async function generateApplePass() {
     }
 
     try {
-        console.log('Sending request to generate Apple Pass...'); // Debug log
-        const response = await fetch('/generate-apple-pass', {  // Remove http://localhost:3000
+        console.log('Sending request to generate Apple Pass...');
+        const response = await fetch('/generate-apple-pass', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -180,10 +180,37 @@ async function generateApplePass() {
             throw new Error(errorData.details || 'Failed to generate pass');
         }
 
-        const { passUrl } = await response.json();
-        window.location.href = passUrl;
+        // Handle the .pkpass file download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `climbing-card-${barcodeNumber}.pkpass`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
     } catch (error) {
-        console.error('Apple Pass Error:', error); // Debug log
+        console.error('Apple Pass Error:', error);
         alert('Erreur lors de la génération du pass Apple Wallet: ' + error.message);
     }
-} 
+}
+
+function clearInput() {
+    const input = document.getElementById('barcodeInput');
+    const clearButton = input.parentElement.querySelector('.clear-input-new');
+    input.value = '';
+    input.focus();
+    clearButton.classList.remove('visible');
+}
+
+// Add this at the beginning of your file with other event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('barcodeInput');
+    const clearButton = input.parentElement.querySelector('.clear-input-new');
+    
+    input.addEventListener('input', function() {
+        clearButton.classList.toggle('visible', this.value.length > 0);
+    });
+}); 

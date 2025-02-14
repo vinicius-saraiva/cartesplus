@@ -276,8 +276,9 @@ app.post('/generate-apple-pass', async (req, res) => {
     try {
         const { barcodeNumber } = req.body;
         
-        console.log('Generating pass for barcode:', barcodeNumber); // Debug log
+        console.log('Generating pass for barcode:', barcodeNumber);
         
+        // First request to generate the pass
         const response = await fetch(`https://api.passslot.com/v1/templates/${PASSSLOT_TEMPLATE_ID}/pass`, {
             method: 'POST',
             headers: {
@@ -291,17 +292,37 @@ app.post('/generate-apple-pass', async (req, res) => {
             })
         });
 
-        console.log('PassSlot response status:', response.status); // Debug log
-
         if (!response.ok) {
             const error = await response.json();
-            console.error('PassSlot error response:', error); // Debug log
+            console.error('PassSlot error response:', error);
             throw new Error(error.message || 'Failed to generate pass');
         }
 
         const data = await response.json();
-        console.log('PassSlot success response:', data); // Debug log
-        res.json({ passUrl: data.url });
+        
+        // Second request to get the actual .pkpass file
+        const passResponse = await fetch(data.url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Basic ${Buffer.from(PASSSLOT_API_KEY + ':').toString('base64')}`
+            }
+        });
+
+        if (!passResponse.ok) {
+            throw new Error('Failed to download pass file');
+        }
+
+        // Get the pass data
+        const passBuffer = await passResponse.buffer();
+
+        // Set headers for file download
+        res.set({
+            'Content-Type': 'application/vnd.apple.pkpass',
+            'Content-Disposition': `attachment; filename=climbing-card-${barcodeNumber}.pkpass`
+        });
+
+        // Send the file directly to the client
+        res.send(passBuffer);
 
     } catch (error) {
         console.error('PassSlot Error:', error);
