@@ -4,13 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cartes+</title>
-    <link rel="icon" type="image/png" href="images/cartes+logo.png">
+    <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@zxing/library@latest"></script>
     <link rel="stylesheet" href="style.css">
-    
+    <style>
+        .input-group {
+            position: relative;
+            width: 100%;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding-right: 40px; /* Make room for the clear button */
+        }
+
+        .clear-input-new {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            display: none; /* Hidden by default */
+            color: #666;
+            opacity: 0.6;
+            visibility: hidden; /* Add this to ensure it's hidden */
+        }
+
+        .clear-input-new:hover {
+            opacity: 1;
+        }
+
+        .clear-input-new svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .clear-input-new.visible {
+            display: block;
+            visibility: visible; /* Show when visible class is added */
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -55,7 +94,7 @@
                         minlength="12"
                         oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                     >
-                    <button type="button" class="clear-input" onclick="clearInput()" aria-label="Clear input">
+                    <button type="button" class="clear-input-new" onclick="clearInput()" aria-label="Clear input">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" fill="currentColor"/>
                         </svg>
